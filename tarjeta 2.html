@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Cumpleaños | Especial Jefesito</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600;800&family=Quicksand:wght@400;600;700&display=swap');
+
+        :root {
+            --birthday-blue: #3498db;
+            --birthday-blue-dark: #2980b9;
+            --birthday-orange-pastel: #fff2e6;
+            --birthday-orange-accent: #ff9f43;
+        }
+
+        /* Centrado absoluto */
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--birthday-orange-pastel);
+            background-image: radial-gradient(#ffdfba 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2c3e50;
+        }
+
+        .cursive { font-family: 'Dancing Script', cursive; }
+        .festive { font-family: 'Montserrat', sans-serif; }
+
+        .screen-container {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- Estructura 3D del Libro --- */
+        .card-wrapper {
+            perspective: 2000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .book {
+            width: 280px;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s ease;
+            transform: translateX(0);
+        }
+
+        @media (min-width: 768px) {
+            .book { width: 320px; height: 460px; }
+        }
+
+        .page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: left;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.5s;
+            transform-style: preserve-3d;
+            border-radius: 0 15px 15px 0;
+        }
+
+        .side {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.05);
+        }
+
+        .side-back {
+            transform: rotateY(180deg);
+            border-radius: 15px 0 0 15px;
+        }
+
+        /* Estilos de Caras */
+        .front-cover {
+            background: var(--birthday-blue);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-left: 8px solid var(--birthday-blue-dark);
+        }
+
+        .inside-left-1 {
+            background: #ebf5fb;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-right: 2px solid #aed6f1;
+        }
+
+        .inside-right-middle {
+            background: white;
+            justify-content: space-between;
+            box-shadow: inset 10px 0 20px rgba(0,0,0,0.05);
+        }
+
+        .inside-left-2 {
+            background: #fdf2e9;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-right: 2px solid #fab1a0;
+        }
+
+        .inside-final {
+            background: white;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .flipped { transform: rotateY(-170deg); }
+
+        .photo-frame {
+            border: 6px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+
+        .gift-box-svg {
+            color: var(--birthday-blue);
+            transition: transform 0.2s;
+            filter: drop-shadow(0 10px 15px rgba(52, 152, 219, 0.3));
+        }
+
+        .shake { animation: shakeEffect 0.4s ease-in-out; }
+        @keyframes shakeEffect {
+            0%, 100% { transform: scale(var(--s)) rotate(0); }
+            20% { transform: scale(var(--s)) rotate(5deg); }
+            60% { transform: scale(var(--s)) rotate(-5deg); }
+        }
+
+        .btn-birthday {
+            background: var(--birthday-orange-accent);
+            color: white;
+            font-weight: 800;
+            padding: 12px;
+            border-radius: 12px;
+            width: 90%;
+            transition: all 0.3s;
+        }
+
+        .music-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 200;
+            background: white;
+            color: var(--birthday-blue);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .nav-arrow {
+            background: white;
+            color: var(--birthday-blue);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .nav-arrow:hover {
+            transform: translateY(-2px);
+            border-color: var(--birthday-blue);
+        }
+
+        .nav-arrow.disabled {
+            opacity: 0.2;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio -->
+    <audio id="bg-music" loop>
+        <source src="https://docs.google.com/uc?export=open&id=16RY_xTaRiLsWM0a7madh3pvBQA7mel0m" type="audio/mpeg">
+    </audio>
+
+    <!-- Botón Música -->
+    <div id="music-toggle" class="music-btn hidden" onclick="toggleMusic()">
+        <span id="music-icon">🎵</span>
+    </div>
+
+    <!-- PANTALLA 1: REGALO -->
+    <div id="gift-screen" class="screen-container">
+        <div class="flex flex-col items-center space-y-10">
+            <div class="text-center space-y-2">
+                <h1 class="festive text-3xl font-black text-blue-600 uppercase">¡Feliz Cumpleaños!</h1>
+                <p id="gift-instruction" class="text-blue-900/40 font-medium px-4">Toca el regalo para tu sorpresa...</p>
+            </div>
+
+            <div id="gift-click-area" class="relative cursor-pointer gift-box-svg" style="--s: 1;">
+                <svg class="w-48 h-48" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20,6H17.82A3.91,3.91,0,0,0,18,5a3,3,0,0,0-3-3,3.41,3.41,0,0,0-2.31,1.11,3.41,3.41,0,0,0-2.31-1.11,3,3,0,0,0-3,3,3.91,3.91,0,0,0,.18,1H4A2,2,0,0,0,2,8V10a2,2,0,0,0,.5,1.26A2,2,0,0,0,2,13v5a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V13a2,2,0,0,0-.5-1.26A2,2,0,0,0,22,10V8A2,2,0,0,0,20,6ZM15,4a1,1,0,0,1,1,1,1,1,0,0,1-1,1H13.41l1-1.24A1.43,1.43,0,0,1,15,4ZM9,5a1,1,0,0,1,1-1,1.43,1.43,0,0,1,.61.76l1,1.24H9ZM4,8H20v2H4Zm16,10H4V13H20Z"/>
+                </svg>
+            </div>
+
+            <div class="w-56 h-3 bg-blue-100/50 rounded-full overflow-hidden border border-blue-200">
+                <div id="progress-bar" class="h-full bg-blue-500 transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 2: TARJETA -->
+    <div id="card-screen" class="screen-container hidden">
+        <div class="card-wrapper">
+            <div id="book" class="book">
+                <!-- PÁGINA 1: PORTADA / INTERIOR IZQUIERDO 1 -->
+                <div id="p1" class="page" style="z-index: 3;">
+                    <div class="side front-cover">
+                        <div class="text-6xl mb-6">🎂</div>
+                        <h2 class="text-2xl md:text-3xl font-bold cursive leading-tight">
+                            Para el mejor jefesito santo del mundo mundial 🌎🌍
+                        </h2>
+                        <p class="mt-8 text-[10px] uppercase tracking-widest opacity-60">Usa las flechas de abajo</p>
+                    </div>
+                    <div class="side side-back inside-left-1">
+                        <p class="cursive text-2xl text-blue-600 mb-6">Eres increíble ✨</p>
+                        <p class="text-slate-500 text-sm px-4">
+                            "Cada día es una oportunidad para agradecer que estés en mi vida."
+                        </p>
+                    </div>
+                </div>
+
+                <!-- PÁGINA 2: INTERIOR DERECHO 1 / INTERIOR IZQUIERDO 2 -->
+                <div id="p2" class="page" style="z-index: 2;">
+                    <div class="side inside-right-middle">
+                        <p class="text-[10px] text-blue-400 font-bold uppercase text-center mt-2">Nuestros momentos</p>
+                        <div class="photo-frame p-1 bg-white mx-auto">
+                            <img src="https://docs.google.com/uc?export=view&id=1kwqg8F9ZO8UuNyxVq2aK4sopkXKqrpaG" 
+                                 class="w-full h-40 md:h-48 object-cover rounded-sm">
+                        </div>
+                        <p class="text-center text-xs text-slate-600 font-medium px-4 italic mb-4">
+                            "Gracias por ser mi guía, mi apoyo y mi persona favorita en todo el mundo."
+                        </p>
+                    </div>
+                    <div class="side side-back inside-left-2">
+                        <p class="cursive text-3xl text-orange-600 mb-4">¡Un regalo más! 🎁</p>
+                        <p class="text-slate-500 text-sm px-6">
+                            He preparado algo especial que resume todo lo que siento...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- PÁGINA 3: INTERIOR FINAL DERECHO (ESTÁTICA) -->
+                <div id="p3" class="page" style="z-index: 1;">
+                    <div class="side inside-final">
+                        <div class="space-y-6 flex flex-col items-center">
+                            <h3 class="festive text-xl font-black text-blue-600 uppercase">¡Mira esto!</h3>
+                            <p class="text-slate-500 text-sm font-bold px-4">
+                                "Te quiero más de lo que las palabras pueden decir."
+                            </p>
+                            <a href="https://drive.google.com/file/d/15RxuSWDM7AyGdtMchWTDwLfpTH9AOZsT/view?usp=drive_link" target="_blank" onclick="event.stopPropagation()" class="btn-birthday flex items-center justify-center space-x-2 shadow-lg">
+                                <span>VER NUESTRO VIDEO 🎥</span>
+                            </a>
+                            <p class="text-[10px] text-slate-400 font-bold tracking-widest mt-4 uppercase">¡Feliz Cumpleaños! 🎉</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles -->
+            <div class="nav-controls">
+                <div id="btn-prev" class="nav-arrow disabled" onclick="prevPage()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
+                </div>
+                <div id="btn-next" class="nav-arrow" onclick="nextPage()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+
+            <button onclick="resetApp()" class="text-[9px] uppercase font-bold tracking-[0.2em] text-slate-400 hover:text-blue-500 transition mt-6">Reiniciar Sorpresa</button>
+        </div>
+    </div>
+
+    <script>
+        let clicks = 0;
+        const totalClicks = 15;
+        let currentPage = 0;
+        let playPromise = null;
+        
+        const emojis = ['🎈', '✨', '🎉', '💙', '🎂', '🥳', '🎁', '🍰', '🧁', '⭐'];
+
+        const giftArea = document.getElementById('gift-click-area');
+        const giftScreen = document.getElementById('gift-screen');
+        const cardScreen = document.getElementById('card-screen');
+        const progressBar = document.getElementById('progress-bar');
+        const book = document.getElementById('book');
+        const audio = document.getElementById('bg-music');
+        const musicToggle = document.getElementById('music-toggle');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+
+        const p1 = document.getElementById('p1');
+        const p2 = document.getElementById('p2');
+
+        function safePlay() {
+            playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {});
+            }
+        }
+
+        giftArea.addEventListener('click', (e) => {
+            if (clicks === 0) {
+                safePlay();
+                musicToggle.classList.remove('hidden');
+            }
+            clicks++;
+            
+            const scale = 1 + (clicks * 0.08);
+            giftArea.style.setProperty('--s', scale);
+            giftArea.style.transform = `scale(${scale})`;
+            giftArea.classList.remove('shake');
+            void giftArea.offsetWidth;
+            giftArea.classList.add('shake');
+            
+            progressBar.style.width = (clicks / totalClicks * 100) + '%';
+
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            spawnEmoji(e.clientX, e.clientY, randomEmoji);
+
+            if (clicks >= totalClicks) {
+                setTimeout(() => {
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#3498db', '#ff9f43', '#ffffff'] });
+                    giftScreen.classList.add('hidden');
+                    cardScreen.classList.remove('hidden');
+                }, 300);
+            }
+        });
+
+        function spawnEmoji(x, y, char) {
+            const p = document.createElement('div');
+            p.innerHTML = char;
+            p.className = 'fixed text-2xl pointer-events-none z-50';
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            document.body.appendChild(p);
+            p.animate([
+                { opacity: 1, transform: 'translateY(0) scale(1)' },
+                { opacity: 0, transform: `translateY(-150px) scale(2) rotate(${Math.random() * 360}deg)` }
+            ], 1200).onfinish = () => p.remove();
+        }
+
+        function nextPage() {
+            if (currentPage < 2) {
+                currentPage++;
+                updateBookState();
+                confetti({ 
+                    particleCount: 20, 
+                    spread: 60, 
+                    origin: { y: 0.8 },
+                    colors: ['#3498db', '#ff9f43']
+                });
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                updateBookState();
+            }
+        }
+
+        function updateBookState() {
+            // Manejo de rotación y apilamiento dinámico
+            if (currentPage === 0) {
+                p1.classList.remove('flipped');
+                p2.classList.remove('flipped');
+                p1.style.zIndex = "3";
+                p2.style.zIndex = "2";
+            } else if (currentPage === 1) {
+                p1.classList.add('flipped');
+                p2.classList.remove('flipped');
+                // Al girar p1, p2 debe estar arriba para verse
+                p1.style.zIndex = "1";
+                p2.style.zIndex = "3";
+            } else if (currentPage === 2) {
+                p1.classList.add('flipped');
+                p2.classList.add('flipped');
+                p1.style.zIndex = "1";
+                p2.style.zIndex = "2"; // p2 se va al fondo al girar, revelando p3 (z-index 1)
+            }
+
+            btnPrev.classList.toggle('disabled', currentPage === 0);
+            btnNext.classList.toggle('disabled', currentPage === 2);
+        }
+
+        function toggleMusic() {
+            const icon = document.getElementById('music-icon');
+            if (audio.paused) {
+                safePlay();
+                icon.innerText = '🎵';
+            } else {
+                if (playPromise !== null) {
+                    playPromise.then(() => {
+                        audio.pause();
+                        icon.innerText = '🔇';
+                    });
+                } else {
+                    audio.pause();
+                    icon.innerText = '🔇';
+                }
+            }
+        }
+
+        function resetApp() {
+            clicks = 0;
+            currentPage = 0;
+            progressBar.style.width = '0%';
+            giftArea.style.transform = 'scale(1)';
+            updateBookState();
+            cardScreen.classList.add('hidden');
+            giftScreen.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
